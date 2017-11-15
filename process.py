@@ -1,6 +1,6 @@
 class process:
 
-    def __init__(self,pid, cup_time, arrival_time, priority, initial_io_time, io_duration):
+    def __init__(self):
         #Identificador unico del proceso
         self.pid = 0
 
