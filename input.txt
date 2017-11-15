@@ -1,0 +1,24 @@
+SRT
+QUANTUM 1
+CONTEXT SWITCH 0
+CPUS 1
+A 0 5
+B 0 3
+C 0 1
+D 2 2
+E 3 4 I/O 3 1   //ojo, operación de I/O de duracion 1, y que empieza tres unidades de tiempo de CPU después de que E fue iniciado por el planificador. Dependiendo de la política, E no necesariamente empezaría a ejecutar en tiempo 3, que es su tiempo de llegada; además, podría estar entrando y saliendo de la CPU antes que le toque esta operación de I/O
+F 3 3
+FIN
+//
+SJF                 // en este ejemplo, la segunda especificación repite la misma política, round robin
+QUANTUM 0.5 // pero con diferente quantum, tiempo de cambio de contexto, y una CPU más
+CONTEXT SWITCH 0.5
+CPUS 2
+A 0 5
+B 0 3
+C 0 1
+D 2 2
+E 3 4 I/O 3 1 
+F 3 3
+FIN
+
