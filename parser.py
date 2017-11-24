@@ -12,7 +12,7 @@ from cpuScheduler import *
 from process import *
 
 def parser():
-    # Data read from S  TDIN stripped from spaces, tabs, and newlines.
+    # Data read from STDIN stripped from spaces, tabs, and newlines.
     data = [line.split("//")[0].strip() for line in sys.stdin]
     simulation = [CPUScheduler(), CPUScheduler()]
     numScheduler = 0
@@ -33,7 +33,7 @@ def parser():
                 simulation[numScheduler].context_switches = float(words[2])
             elif words[0] == "CPUS":
                 simulation[numScheduler].num_cpus = float(words[1])
-            else:
+            elif len(words >= 3) and len(words <= 6):
                 p = process()
                 p.pid = words[0]
                 p.arrival_time = float(words[1])
@@ -42,7 +42,6 @@ def parser():
                     p.initial_io_time = float(words[4])
                     p.io_duration = float(words[5])
                 simulation[numScheduler].processes.append(p)
+            else:
+                print("Error: Entrada de datos incorrecta.")
     return simulation[0], simulation[1]
-
-
-cpuSched1, cpuSched2 = parser()
