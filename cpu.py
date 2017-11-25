@@ -25,6 +25,10 @@ class CPU(object):
 
     # Asigns the process to the CPU
     def assign_process(self, process):
+        # Checar si el proceso actual es el mismo que se habia asignado
+        # anteriomente, para determinar si hay cambio de contexto.
+        if self.current_process != process:
+            self.changed_context = False
         if self.in_use and self.current_process.cpu_time < process.cpu_time
             self.current_process = process
             return True
@@ -43,6 +47,13 @@ class CPU(object):
     # Hace un paso del cpu, se mueve una unidad de tiempo.
     def step(self):
         self.current_time += 1
+        # No ejecutara el proceso y hara return hasta que no hayan pasado
+        # la cantidad de steps necesario para llegar a un cambio de contexto
+        # en caso de que sea un proceso que anteriormente ya estaba en el CPU
+        # la segunda parte la condicion lo dejara pasar
+        if self.current_time < self.context_switch and not changed_context:
+            return
+        changed_context = True
         if self.current_process:
             if self.current_process.cpu_time == self.current_process.time_processed:
                 self.clear()
@@ -54,7 +65,7 @@ class CPU(object):
             else:
                 self.current_process.time_processed += 1
         return None
-    
+
     def change_context(self):
         # TODO(anyone): make it work with the context switch
 
