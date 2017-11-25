@@ -1,17 +1,19 @@
 class process:
 
     def __init__(self):
-        #Identificador unico del proceso
+        # Process ID
         self.pid = 0
-        #Tiempo de CPU en milisegundos que utiliza el proceso
+        # Time in miliseconds that the process is in the cpu
         self.cpu_time = 0
-        #Tiempo en el que llega el proceso en milisegundos
+        # Time that has been processed
+        self.time_processed = 0 
+        # Arrival time of the process to the CPU Scheduler
         self.arrival_time = 0
-        #Prioridad del proceso de 1 a 10 donde 1 es la mayor prioridad
+        # Unused. Priority of the process
         self.priority = 0
-        #Tiempo en el que el proceso pide una operacion de input/output
+        # Time relative to its cpu time in which it orders an IO operation.
         self.initial_io_time = 0
-        #Duracion de la intervencion de Input/Output
+        # Duration of the IO operation
         self.io_duration = 0
 
     def __cmp__(self, other):

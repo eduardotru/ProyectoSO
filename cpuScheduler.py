@@ -29,6 +29,8 @@ class CPUScheduler:
         self.finished = []
         # Priority Queue for the ready processes since they are ordered by cpu time
         self.ready_list = Queue.PriorityQueue()
+        # Process which get blocked because an IO go in here.
+        self.blocked_list = []
         # CPUs that are going to be used
         self.cpus = {}
     
@@ -36,14 +38,28 @@ class CPUScheduler:
         for i in range(1, num_cpus):
             self.cpus.append(CPU(self.quantum, self.context_switches))
     
+    def cpusEmpty(self):
+        empty = True
+        for cpu in self.cpus:
+            empty = empty and not cpu.in_use
+        return empty
+
     # TODO(anyone): Hacer que este programa pare.
     def start(self):
         self.createCPUs()
-        while True:
+        while len(self.processes) > 0 and len(self.ready_list) > 0 and len(self.blocked_list) > 0 and not self.cpusEmpty():
             # Check if there is a process that just arrived and add it to the ready list.
-            for process in processes:
+            for process in self.processes:
                 if process.arrival_time == self.timer:
                     self.ready_list.put(process)
+                    self.processes.remove(process)
+            # Check the process that are blocked if they can be unblocked
+            for blocked_p in blocked_list:
+                if blocked_p.io_duration == 0:
+                    blocked_list.remove(blocked_p)
+                    self.ready_list.put(blocked_p)
+                else:
+                    blocked_p.io_duration -= 1
             # SJF is a non preemptive algorithm so first check if the cpu is not in use.
             if self.algorithm == "SJF":
                 for cpu in self.cpus:
