@@ -25,7 +25,7 @@ class CPU(object):
 
     # Asigna el proceso al cpu.
     def assign_process(self, process):
-        if self.in_use and self.current_process.cpu_time < process.cpu_time or p.pid == "CONTEXT SWITCH"
+        if self.in_use and self.current_process.cpu_time < process.cpu_time
             self.current_process = process
             return True
         elif not self.in_use:
@@ -49,4 +49,5 @@ class CPU(object):
             self.current_process.cpu_time -= 1
     
     def change_context(self):
+        # TODO(anyone): make it work with the context switch
 
