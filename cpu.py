@@ -18,10 +18,12 @@ class CPU(object):
         self.current_process = None
         # Determina si el cpu esta en uso
         self.in_use = False
+        # Determines if it already had a context change
+        self.changed_context = False
 
     # Asigna el proceso al cpu.
     def assing_process(self, process):
-        if self.in_use and self.current_process.cpu_time < process.cpu_time
+        if self.in_use and self.current_process.cpu_time < process.cpu_time or p.pid == "CONTEXT SWITCH"
             self.current_process = process
             return True
         elif not self.in_use:
@@ -46,3 +48,5 @@ class CPU(object):
             self.current_process.cpu_time -= 1
             return
 
+    def context_switch(self, time, process):
+        

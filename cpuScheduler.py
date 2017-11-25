@@ -43,13 +43,23 @@ class CPUScheduler:
             for process in processes:
                 if process.arrival_time == self.timer:
                     self.ready_list.put(process)
-            if self.algorithm == "SJF": 
-                for cpu in cpus:
-                    if not cpu.in_use and len(self.ready_list) > 0:
+            if self.algorithm == "SJF":
+                for cpu in self.cpus:
+                    cpu.step()
+                    if self.context_switches != 0 and not cpu.in_use and not cpu.change_context:
+                        context_switch = process()
+                        context_switch.pid = "CONTEXT SWITCH"
+                        cpu.assign_process(context_switch)
+                        cpu.context_switch = True
+                    elif not cpu.in_use and len(self.ready_list) > 0:
+                        context_switch.cpu_time = self.context_switches
                         cpu.assign_process(self.ready_list.get())
-                # TODO(anyone): Terminar esto
+                        cpu.changed_context = False
             elif self.algorithm == "SRT":
-                # TODO(anyone): Terminar esto tambien
+                for cpu in self.cpus:
+                    cpu.step()
+                    if len(self.ready_list) > 0:
+                        p = self.ready_list.get()                            
             else:
                 print("Incorrect schedulling algorithm, cannot start CPUScheduler.")
                 return
