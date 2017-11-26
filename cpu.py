@@ -27,14 +27,14 @@ class CPU(object):
 
     # Asigns the process to the CPU
     def assign_process(self, process):
-        # Checar si el proceso actual es el mismo que se habia asignado
-        # anteriomente, para determinar si hay cambio de contexto.
-        if self.current_process and self.current_process.pid != process.pid:
-            self.changed_context = False
+        if not self.changed_context:
+            return False
         if self.in_use and self.current_process.cpu_time < process.cpu_time:
+            self.change_context(process)
             self.current_process = process
             return True
         elif not self.in_use:
+            self.change_context(process)
             self.current_process = process
             self.in_use = True
             return True
@@ -43,6 +43,7 @@ class CPU(object):
 
     # Limpia todas las variables del cpu
     def clear(self):
+        self.current_process = None
         self.in_use = False
         self.current_time = 0
 
@@ -53,9 +54,10 @@ class CPU(object):
         # la cantidad de steps necesario para llegar a un cambio de contexto
         # en caso de que sea un proceso que anteriormente ya estaba en el CPU
         # la segunda parte la condicion lo dejara pasar
-        if self.current_time < self.context_switch and not changed_context:
+        if self.current_time == self.context_switch:
+            self.changed_context = True
+        if not self.changed_context:
             return None
-        changed_context = True
         if self.current_process:
             if self.current_process.cpu_time == self.current_process.time_processed:
                 self.clear()
@@ -68,12 +70,20 @@ class CPU(object):
                 self.current_process.time_processed += 1
         return None
 
-    def change_context(self):
-        # TODO(anyone): make it work with the context switch
-        return
+    def change_context(self, process):
+        if self.current_process and self.current_process.pid != process.pid:
+                self.changed_context = False
 
     def __repr__(self):
         return str(self)
 
     def __str__(self):
-        return "CPU " + str(self.num) + ": " + str(self.current_process)
+        process = ""
+        context = ""
+        if self.in_use:
+            process = str(self.current_process)
+        else:
+            process = "EMPTY "
+        if not self.changed_context:
+            context = "Context Switch "
+        return "CPU " + str(self.num) + ": " + context + process

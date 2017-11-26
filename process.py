@@ -15,12 +15,21 @@ class process:
         self.initial_io_time = []
         # Duration of the IO operation
         self.io_duration = []
+        # True if the process is blocked in an IO operation
+        self.blocked = False
 
     def __cmp__(self, other):
         return cmp(self.cpu_time, other.cpu_time)
 
     def __str__(self):
-        return self.pid + "(" + str(self.cpu_time - self.time_processed) + ")"
+        process_string = self.pid + "("
+        if self.blocked:
+            process_string += str(self.io_duration[0]) + ")"
+            if self.io_duration[0] == 1:
+                process_string += " -- termina IO"
+        else:
+            process_string += str(self.cpu_time - self.time_processed) + ")"
+        return process_string
 
     def __repr__(self):
         return str(self)

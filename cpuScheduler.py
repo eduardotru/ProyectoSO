@@ -47,7 +47,7 @@ class CPUScheduler:
 
     # TODO(anyone): Hacer que este programa pare.
     def start(self):
-        print("CPUScheduler started ===============================")
+        self.outputHeader()
         self.createCPUs()
         while len(self.processes) > 0 or len(self.ready_list.queue) > 0 or len(self.blocked_list) > 0 or not self.cpusEmpty():
             # Check if there is a process that just arrived and add it to the ready list.
@@ -60,6 +60,7 @@ class CPUScheduler:
             aux = list(self.blocked_list)
             for blocked_p in aux:
                 if blocked_p.io_duration[0] == 0:
+                    blocked_p.blocked = False
                     self.blocked_list.remove(blocked_p)
                     blocked_p.io_duration.remove(0)
                     self.ready_list.put(blocked_p)
@@ -70,7 +71,9 @@ class CPUScheduler:
                 for cpu in self.cpus:
                     blocked = cpu.step()
                     if blocked:
+                        blocked.blocked = True
                         self.blocked_list.append(blocked)
+                for cpu in self.cpus:
                     if not cpu.in_use and len(self.ready_list.queue) > 0:
                         p = self.ready_list.get()
                         cpu.assign_process(p)
@@ -79,6 +82,7 @@ class CPUScheduler:
                 for cpu in self.cpus:
                     blocked = cpu.step()
                     if blocked:
+                        blocked.blocked = True
                         self.blocked_list.append(blocked)
                     if len(self.ready_list.queue) > 0:
                         p = self.ready_list.get()
@@ -90,18 +94,19 @@ class CPUScheduler:
                 return
             self.output()
             self.timer += 1
+            if self.timer > 30:
+                break
+
+    def outputHeader(self):
+        print("=============================================================================================================================================")
+        print("|| Tiempo   || Cola de Listos                    || CPUs                                                         || Bloqueados             ||")
+        print("---------------------------------------------------------------------------------------------------------------------------------------------")
+
 
     def output(self):
-        print("|| Tiempo: {0:5} || Listos: {1:25} || {2:20} || Bloqueados: {3:10} ||".format(
+        print("|| {0:8} || {1:33} || {2:60} || {3:22} ||".format(
             self.timer, self.ready_list.queue, self.cpus, self.blocked_list))
-        '''
-        print("Procesos bloqueados: ")
-        for blocked in self.blocked_list:
-            if (blocked.io_duration[0] == 1):
-                print(blocked.pid + "(1) -- termina su I/O")
-            else:
-                print(blocked.pid + "(" + str(blocked.io_duration[0]) + ")")'''
-        print("================================================================================================================")
+        print("=============================================================================================================================================")
 
 def parse():
     # Data read from STDIN stripped from spaces, tabs, and newlines.
