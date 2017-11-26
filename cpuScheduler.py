@@ -88,7 +88,19 @@ class CPUScheduler:
             self.timer += 1
 
     # TODO(anyone): Hacer que se imprima bien el output
-    def output(self):
-        print("Implementame esta")
-
+    def output(self, processInCPU):
+        print("Tiempo: " + self.timer)
+        print("Cola de listos: ")
+        for ready in ready_list
+            print(ready.pid + "(" + ready.cpu_time - ready.time_processed + ")")
+        if (processInCPU.cpu_time - processInCPU.time_processed == 1)
+            print("CPU: " + processInCPU.pid + "(1) --termina")
+        else
+            print("CPU: "  + processInCPU.pid + "("  + processInCPU.cpu_time - processInCPU.time_processed + ")")
+        print("Procesos bloqueados: ")
+        for blocked in blocked_list
+            if (blocked.io_duration[0] == 1)
+                print(blocked.pid + "(1) -- termina su I/O")
+            else
+                print(blocked.pid + "(" + blocked.io_duration[0] + ")")
 cpuSchedule1, cpuSchedule2 = parser()
