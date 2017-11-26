@@ -20,10 +20,7 @@ class process:
         return cmp(self.cpu_time, other.cpu_time)
 
     def __str__(self):
-        ending = ""
-        if(self.cpu_time - self.time_processed == 1):
-            ending = " termina"
-        return self.pid + "(" + str(self.cpu_time - self.time_processed) + ")" + ending
+        return self.pid + "(" + str(self.cpu_time - self.time_processed) + ")"
 
     def __repr__(self):
         return str(self)
