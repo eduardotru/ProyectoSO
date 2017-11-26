@@ -57,7 +57,8 @@ class CPUScheduler:
                     self.ready_list.put(process)
                     self.processes.remove(process)
             # Check the process that are blocked if they can be unblocked
-            for blocked_p in self.blocked_list:
+            aux = list(self.blocked_list)
+            for blocked_p in aux:
                 if blocked_p.io_duration[0] == 0:
                     self.blocked_list.remove(blocked_p)
                     blocked_p.io_duration.remove(0)
@@ -89,22 +90,18 @@ class CPUScheduler:
                 return
             self.output()
             self.timer += 1
-            if(self.timer > 20):
-                break
 
     def output(self):
-        print("Tiempo: " + str(self.timer))
-        print("Cola de listos: ")
-        print(self.ready_list.queue)
-        for cpu in self.cpus:
-            print(cpu)
+        print("|| Tiempo: {0:5} || Listos: {1:25} || {2:20} || Bloqueados: {3:10} ||".format(
+            self.timer, self.ready_list.queue, self.cpus, self.blocked_list))
+        '''
         print("Procesos bloqueados: ")
         for blocked in self.blocked_list:
             if (blocked.io_duration[0] == 1):
                 print(blocked.pid + "(1) -- termina su I/O")
             else:
-                print(blocked.pid + "(" + str(blocked.io_duration[0]) + ")")
-        print("-----------------------")
+                print(blocked.pid + "(" + str(blocked.io_duration[0]) + ")")'''
+        print("================================================================================================================")
 
 def parse():
     # Data read from STDIN stripped from spaces, tabs, and newlines.
