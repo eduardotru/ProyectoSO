@@ -50,45 +50,17 @@ class CPUScheduler:
         self.outputHeader()
         self.createCPUs()
         while len(self.processes) > 0 or len(self.ready_list.queue) > 0 or len(self.blocked_list) > 0 or not self.cpusEmpty():
-            # Check if there is a process that just arrived and add it to the ready list.
-            aux = list(self.processes)
-            for process in aux:
-                if process.arrival_time == self.timer:
-                    self.ready_list.put(process)
-                    self.processes.remove(process)
-            # Check the process that are blocked if they can be unblocked
-            aux = list(self.blocked_list)
-            for blocked_p in aux:
-                if blocked_p.io_duration[0] == 0:
-                    blocked_p.blocked = False
-                    self.blocked_list.remove(blocked_p)
-                    blocked_p.io_duration.remove(0)
-                    self.ready_list.put(blocked_p)
-                else:
-                    blocked_p.io_duration[0] -= 1
-            # SJF is a non preemptive algorithm so first check if the cpu is not in use.
+            # Check to see if there is a Process that just arrived
+            self.checkProcesses()
+            # Check if a process can be unblocked
+            self.checkBlockedList()
+            
             if self.algorithm == "SJF":
-                for cpu in self.cpus:
-                    blocked = cpu.step()
-                    if blocked:
-                        blocked.blocked = True
-                        self.blocked_list.append(blocked)
-                for cpu in self.cpus:
-                    if not cpu.in_use and len(self.ready_list.queue) > 0:
-                        p = self.ready_list.get()
-                        cpu.assign_process(p)
-            # SRT is a preemptive algorithm, assign only if the time is shorter.
+                self.stepCPUs()
+                self.SJF()
             elif self.algorithm == "SRT":
-                for cpu in self.cpus:
-                    blocked = cpu.step()
-                    if blocked:
-                        blocked.blocked = True
-                        self.blocked_list.append(blocked)
-                    if len(self.ready_list.queue) > 0:
-                        p = self.ready_list.get()
-                        assigned = cpu.assign_process(p)
-                        if not assigned:
-                            self.ready_list.put(p)
+                self.stepCPUs()
+                self.SRT()
             else:
                 print("Incorrect schedulling algorithm, cannot start CPUScheduler.")
                 return
@@ -96,18 +68,66 @@ class CPUScheduler:
             self.timer += 1
             if self.timer > 30:
                 break
+        print("=============================================================================================================================================")
 
+    # Check if there is a process that just arrived and add it to the ready list.
+    def checkProcesses(self):
+        aux = list(self.processes)
+        for process in aux:
+            if process.arrival_time == self.timer:
+                self.ready_list.put(process)
+                self.processes.remove(process)
+
+    # Check the process that are blocked if they can be unblocked
+    def checkBlockedList(self):
+        aux = list(self.blocked_list)
+        for blocked_p in aux:
+            if blocked_p.io_duration[0] == 0:
+                blocked_p.blocked = False
+                self.blocked_list.remove(blocked_p)
+                blocked_p.io_duration.remove(0)
+                self.ready_list.put(blocked_p)
+            else:
+                blocked_p.io_duration[0] -= 1
+    
+    # Make a step in each CPU
+    def stepCPUs(self):
+        for cpu in self.cpus:
+            blocked = cpu.step()
+            if blocked:
+                blocked.blocked = True
+                self.blocked_list.append(blocked)
+    
+    # SJF is a non preemptive algorithm so first check if the cpu is not in use.
+    def SJF(self):
+        for cpu in self.cpus:
+            if not cpu.in_use and len(self.ready_list.queue) > 0:
+                p = self.ready_list.get()
+                cpu.assign_process(p)
+
+    # SRT is a preemptive algorithm, assign only if the time is shorter.
+    def SRT(self):
+        for cpu in self.cpus:
+            if len(self.ready_list.queue) > 0:
+                p = self.ready_list.get()
+                assigned = cpu.assign_process(p)
+                if not assigned:
+                    self.ready_list.put(p)
+
+    # Output the Header of the table
     def outputHeader(self):
         print("=============================================================================================================================================")
         print("|| Tiempo   || Cola de Listos                    || CPUs                                                         || Bloqueados             ||")
         print("---------------------------------------------------------------------------------------------------------------------------------------------")
 
-
+    # Outputs a row of the table according to the information in the CPUScheduller
     def output(self):
         print("|| {0:8} || {1:33} || {2:60} || {3:22} ||".format(
             self.timer, self.ready_list.queue, self.cpus, self.blocked_list))
-        print("=============================================================================================================================================")
+        print("---------------------------------------------------------------------------------------------------------------------------------------------")
 
+
+# Parses the incoming data to create the two CPUSchedulers
 def parse():
     # Data read from STDIN stripped from spaces, tabs, and newlines.
     data = [line.split("//")[0].strip() for line in sys.stdin]
