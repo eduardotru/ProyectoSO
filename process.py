@@ -12,9 +12,9 @@ class process:
         # Unused. Priority of the process
         self.priority = 0
         # Time relative to its cpu time in which it orders an IO operation.
-        self.initial_io_time = 0
+        self.initial_io_time = []
         # Duration of the IO operation
-        self.io_duration = 0
+        self.io_duration = []
 
     def __cmp__(self, other):
         return cmp(self.cpu_time, other.cpu_time)

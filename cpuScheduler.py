@@ -34,10 +34,12 @@ class CPUScheduler:
         # CPUs that are going to be used
         self.cpus = {}
     
+    # Creates CPU objects
     def createCPUs(self):
         for i in range(1, num_cpus):
             self.cpus.append(CPU(self.quantum, self.context_switches))
     
+    # Returns True if all cpus are not in use
     def cpusEmpty(self):
         empty = True
         for cpu in self.cpus:
@@ -55,15 +57,18 @@ class CPUScheduler:
                     self.processes.remove(process)
             # Check the process that are blocked if they can be unblocked
             for blocked_p in blocked_list:
-                if blocked_p.io_duration == 0:
+                if blocked_p.io_duration[0] == 0:
                     blocked_list.remove(blocked_p)
+                    blocked_p.io_duration.remove(0)
                     self.ready_list.put(blocked_p)
                 else:
-                    blocked_p.io_duration -= 1
+                    blocked_p.io_duration[0] -= 1
             # SJF is a non preemptive algorithm so first check if the cpu is not in use.
             if self.algorithm == "SJF":
                 for cpu in self.cpus:
-                    cpu.step()
+                    blocked = cpu.step()
+                    if blocked:
+                        self.blocked_list.append(blocked)
                     if not cpu.in_use and len(self.ready_list) > 0:
                         p = self.ready_list.get()
                         cpu.assign_process(p)
