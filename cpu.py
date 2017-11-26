@@ -9,7 +9,9 @@
 """
 
 class CPU(object):
-    def __init__(self, quantum, context_switch):
+    def __init__(self, num, quantum, context_switch):
+        # CPU id number
+        self.num = num
         # CPU quantum
         self.quantum = quantum
         # Time the cpu is on
@@ -27,9 +29,9 @@ class CPU(object):
     def assign_process(self, process):
         # Checar si el proceso actual es el mismo que se habia asignado
         # anteriomente, para determinar si hay cambio de contexto.
-        if self.current_process != process:
+        if self.current_process and self.current_process.pid != process.pid:
             self.changed_context = False
-        if self.in_use and self.current_process.cpu_time < process.cpu_time
+        if self.in_use and self.current_process.cpu_time < process.cpu_time:
             self.current_process = process
             return True
         elif not self.in_use:
@@ -52,7 +54,7 @@ class CPU(object):
         # en caso de que sea un proceso que anteriormente ya estaba en el CPU
         # la segunda parte la condicion lo dejara pasar
         if self.current_time < self.context_switch and not changed_context:
-            return
+            return None
         changed_context = True
         if self.current_process:
             if self.current_process.cpu_time == self.current_process.time_processed:
@@ -68,4 +70,10 @@ class CPU(object):
 
     def change_context(self):
         # TODO(anyone): make it work with the context switch
+        return
 
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return "CPU " + str(self.num) + ": " + str(self.current_process)

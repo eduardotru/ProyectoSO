@@ -8,10 +8,10 @@
         Input parser that generates the different structures used.
 """
 import sys
-from cpuScheduler import *
+from cpuScheduler import CPUScheduler
 from process import *
 
-def parser():
+def parse():
     # Data read from STDIN stripped from spaces, tabs, and newlines.
     data = [line.split("//")[0].strip() for line in sys.stdin]
     simulation = [CPUScheduler(), CPUScheduler()]
@@ -33,14 +33,14 @@ def parser():
                 simulation[numScheduler].context_switches = float(words[2])
             elif words[0] == "CPUS":
                 simulation[numScheduler].num_cpus = float(words[1])
-            elif len(words >= 3) and len(words <= 6):
+            elif len(words) >= 3 and len(words) <= 6:
                 p = process()
                 p.pid = words[0]
                 p.arrival_time = float(words[1])
                 p.cpu_time = float(words[2])
                 if len(words) > 3 and words[3] == "I/O":
-                    p.initial_io_time = float(words[4])
-                    p.io_duration = float(words[5])
+                    p.initial_io_time.append(float(words[4]))
+                    p.io_duration.append(float(words[5]))
                 simulation[numScheduler].processes.append(p)
             else:
                 print("Error: Entrada de datos incorrecta.")

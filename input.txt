@@ -1,4 +1,4 @@
-SRT
+SJF
 QUANTUM 1
 CONTEXT SWITCH 0
 CPUS 1
@@ -10,9 +10,9 @@ E 3 4 I/O 3 1   //ojo, operación de I/O de duracion 1, y que empieza tres unida
 F 3 3
 FIN
 //
-SJF                 // en este ejemplo, la segunda especificación repite la misma política, round robin
-QUANTUM 0.5 // pero con diferente quantum, tiempo de cambio de contexto, y una CPU más
-CONTEXT SWITCH 0.5
+SRT                 // en este ejemplo, la segunda especificación repite la misma política, round robin
+QUANTUM 0 // pero con diferente quantum, tiempo de cambio de contexto, y una CPU más
+CONTEXT SWITCH 1
 CPUS 2
 A 0 5
 B 0 3

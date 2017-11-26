@@ -18,3 +18,12 @@ class process:
 
     def __cmp__(self, other):
         return cmp(self.cpu_time, other.cpu_time)
+
+    def __str__(self):
+        ending = ""
+        if(self.cpu_time - self.time_processed == 1):
+            ending = " termina"
+        return self.pid + "(" + str(self.cpu_time - self.time_processed) + ")" + ending
+
+    def __repr__(self):
+        return str(self)
