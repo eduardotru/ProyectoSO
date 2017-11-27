@@ -97,6 +97,7 @@ class CPUScheduler:
         tiempo_espera_prom = 0
         count = 0
         for process in self.processes_copy:
+            process.time_to_finish = process.time_to_finish - process.number_of_io
             print("Process ID: %s" %(process.pid))
             print("Turaround time: %s" % (process.time_to_finish - 1))
             print("Tiempo de espera: %s" % (process.time_to_finish - 1 - process.cpu_time))
@@ -139,7 +140,7 @@ class CPUScheduler:
                 blocked.blocked = True
                 self.blocked_list.append(blocked) #CPU listos y bloquedados
             for process in self.processes_copy:
-                if cpu.current_process and process.pid == cpu.current_process.pid:
+                if cpu.current_process and process.pid == cpu.current_process.pid and not cpu.current_process.blocked:
                     process.time_to_finish += 1
         for process_block in self.blocked_list:
             for process_copy in self.processes_copy:
@@ -233,6 +234,7 @@ def parse():
                     words.pop(0)
                     words.pop(0)
                     zipped = zip(words[0::2], words[1::2])
+                    p.number_of_io = len(zipped)
                     for pair in zipped:
                         p.initial_io_time.append(int(pair[0]))
                         p.io_duration.append(int(pair[1]))

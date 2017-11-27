@@ -13,6 +13,8 @@ class process:
         self.priority = 0
         # Time relative to its cpu time in which it orders an IO operation.
         self.initial_io_time = []
+        # Number of io operations
+        self.number_of_io = 0
         # Duration of the IO operation
         self.io_duration = []
         # True if the process is blocked in an IO operation
