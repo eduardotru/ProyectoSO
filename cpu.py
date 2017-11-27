@@ -32,18 +32,19 @@ class CPU(object):
         if self.in_use and self.current_process.cpu_time < process.cpu_time:
             self.change_context(process)
             self.current_process = process
+            self.current_time = 0
             return True
         elif not self.in_use:
             self.change_context(process)
             self.current_process = process
             self.in_use = True
+            self.current_time = 0
             return True
         else:
             return False
 
     # Limpia todas las variables del cpu
     def clear(self):
-        self.current_process = None
         self.in_use = False
         self.current_time = 0
 
@@ -54,25 +55,27 @@ class CPU(object):
         # la cantidad de steps necesario para llegar a un cambio de contexto
         # en caso de que sea un proceso que anteriormente ya estaba en el CPU
         # la segunda parte la condicion lo dejara pasar
-        if self.current_time == self.context_switch:
+        if self.current_process and self.current_time == self.context_switch and self.context_switch != 0 and not self.changed_context:
+            self.current_process.time_processed -= 1
+        if self.current_time >= self.context_switch:
             self.changed_context = True
         if not self.changed_context:
             return None
         if self.current_process:
-            if self.current_process.cpu_time == self.current_process.time_processed:
+            if self.current_process.cpu_time - 1 == self.current_process.time_processed:
                 self.clear()
             elif self.current_process.time_processed in self.current_process.initial_io_time:
                 p = self.current_process
                 self.clear()
                 p.initial_io_time.remove(p.time_processed)
-                return self.current_process 
-            else:
+                return self.current_process
+            elif not self.current_process.blocked:
                 self.current_process.time_processed += 1
         return None
 
     def change_context(self, process):
-        if self.current_process and self.current_process.pid != process.pid:
-                self.changed_context = False
+        if self.current_process and self.current_process.pid != process.pid and self.context_switch != 0:
+            self.changed_context = False
 
     def __repr__(self):
         return str(self)

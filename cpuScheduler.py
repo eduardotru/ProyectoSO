@@ -21,9 +21,9 @@ class CPUScheduler:
         # The number of CPUs of the scheduler
         self.num_cpus = 0
         # Unused since SJF nor SRT use quantum
-        self.quantum = 0
+        self.quantum = -1
         # Time that it takes to change context
-        self.context_switches = 0
+        self.context_switches = -1
         # List of processes
         self.processes = []
         # Priority Queue for the ready processes since they are ordered by cpu time
@@ -36,7 +36,13 @@ class CPUScheduler:
     # Creates CPU objects
     def createCPUs(self):
         for i in range(self.num_cpus):
-            self.cpus.append(CPU(i+1, self.quantum, self.context_switches))
+            new_cpu = CPU(i+1, self.quantum, self.context_switches)
+            # If context switch takes 0, then the CPU is already done with
+            # context switch
+            if self.context_switches == 0:
+                new_cpu.changed_context = True
+            self.cpus.append(new_cpu)
+
     
     # Returns True if all cpus are not in use
     def cpusEmpty(self):
@@ -66,7 +72,7 @@ class CPUScheduler:
                 return
             self.output()
             self.timer += 1
-            if self.timer > 30:
+            if self.timer > 100:
                 break
         print("=============================================================================================================================================")
 
@@ -82,14 +88,14 @@ class CPUScheduler:
     def checkBlockedList(self):
         aux = list(self.blocked_list)
         for blocked_p in aux:
-            if blocked_p.io_duration[0] == 0:
+            if blocked_p.io_duration[0] == 1:
                 blocked_p.blocked = False
                 self.blocked_list.remove(blocked_p)
-                blocked_p.io_duration.remove(0)
+                blocked_p.io_duration.remove(1)
                 self.ready_list.put(blocked_p)
             else:
                 blocked_p.io_duration[0] -= 1
-    
+
     # Make a step in each CPU
     def stepCPUs(self):
         for cpu in self.cpus:
@@ -97,13 +103,16 @@ class CPUScheduler:
             if blocked:
                 blocked.blocked = True
                 self.blocked_list.append(blocked)
-    
+
     # SJF is a non preemptive algorithm so first check if the cpu is not in use.
     def SJF(self):
         for cpu in self.cpus:
             if not cpu.in_use and len(self.ready_list.queue) > 0:
                 p = self.ready_list.get()
-                cpu.assign_process(p)
+                assigned = cpu.assign_process(p)
+                if not assigned:
+                    self.ready_list.put(p)
+
 
     # SRT is a preemptive algorithm, assign only if the time is shorter.
     def SRT(self):
@@ -131,38 +140,53 @@ class CPUScheduler:
 def parse():
     # Data read from STDIN stripped from spaces, tabs, and newlines.
     data = [line.split("//")[0].strip() for line in sys.stdin]
-    simulation = [CPUScheduler(), CPUScheduler()]
+    simulations = []
+    simulation = CPUScheduler()
     numScheduler = 0
     for line in data:
+        print line
         if line == "FIN":
+            if simulation.context_switches == 0:
+                simulation.changed_context = True
+            if simulation.quantum != -1 and simulation.context_switches != -1 and simulation.algorithm != "" and len(simulation.processes) > 0:
+                simulations.append(simulation)
+            simulation = CPUScheduler()
             numScheduler+=1
         elif line == "SJF":
-            simulation[numScheduler].algorithm = "SJF"
+            simulation.algorithm = "SJF"
         elif line == "SRT":
-            simulation[numScheduler].algorithm = "SRT"
+            simulation.algorithm = "SRT"
         else:
             words = line.split(" ")
             if len(words) == 0 or words[0] == "":
                 continue
             elif words[0] == "QUANTUM":
-                simulation[numScheduler].quantum = int(words[1])
+                simulation.quantum = int(words[1])
             elif words[0] == "CONTEXT":
-                simulation[numScheduler].context_switches = int(words[2])
+                simulation.context_switches = int(words[2])
             elif words[0] == "CPUS":
-                simulation[numScheduler].num_cpus = int(words[1])
-            elif len(words) >= 3 and len(words) <= 6:
+                simulation.num_cpus = int(words[1])
+            elif len(words) >= 3 and words[0].isdigit() and words[1].isdigit() and words[2].isdigit():
                 p = process()
-                p.pid = words[0]
+                p.pid = int(words[0])
                 p.arrival_time = int(words[1])
                 p.cpu_time = int(words[2])
                 if len(words) > 3 and words[3] == "I/O":
-                    p.initial_io_time.append(int(words[4]))
-                    p.io_duration.append(int(words[5]))
-                simulation[numScheduler].processes.append(p)
+                    is_start = True
+                    words.pop(0)
+                    words.pop(0)
+                    words.pop(0)
+                    words.pop(0)
+                    zipped = zip(words[0::2], words[1::2])
+                    for pair in zipped:
+                        p.initial_io_time.append(int(pair[0]))
+                        p.io_duration.append(int(pair[1]))
+                simulation.processes.append(p)
             else:
                 print("Error: Entrada de datos incorrecta.")
-    return simulation[0], simulation[1]
+    return simulations
 
-cpuSchedule1, cpuSchedule2 = parse()
-cpuSchedule1.start()
-cpuSchedule2.start()
+simulations = parse()
+
+for simulation in simulations:
+    simulation.start()

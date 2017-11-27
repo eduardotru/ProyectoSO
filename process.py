@@ -22,7 +22,7 @@ class process:
         return cmp(self.cpu_time, other.cpu_time)
 
     def __str__(self):
-        process_string = self.pid + "("
+        process_string = str(self.pid) + "("
         if self.blocked:
             process_string += str(self.io_duration[0]) + ")"
             if self.io_duration[0] == 1:
