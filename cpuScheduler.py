@@ -15,6 +15,8 @@ from process import *
 timeSRT = []
 timeSJF = []
 
+arrayInput = []
+
 class CPUScheduler:
     def __init__(self):
         # The timer expresses the actual time
@@ -60,12 +62,16 @@ class CPUScheduler:
 
     # TODO(anyone): Hacer que este programa pare.
     def start(self):
+        print("=============================================================================================================================================")
+        print("Input")
+        for arr in arrayInput[0]:
+            print(arr)
+        arrayInput.pop(0)
         self.outputHeader()
         self.createCPUs()
 
         for proc in self.processes:
             self.processes_copy.append(proc)
-
         while len(self.processes) > 0 or len(self.ready_list.queue) > 0 or len(self.blocked_list) > 0 or not self.cpusEmpty():
             # Check to see if there is a Process that just arrived
             self.checkProcesses()
@@ -85,7 +91,7 @@ class CPUScheduler:
             self.timer += 1
             if self.timer > 1000:
                 break
-        print("=============================================================================================================================================")
+        print("---------------------------------------------------------------------------------------------------------------------------------------------")
         print ("Estadisitcas: ")
         turnaround_prom = 0
         tiempo_espera_prom = 0
@@ -184,20 +190,26 @@ def parse():
     simulations = []
     simulation = CPUScheduler()
     numScheduler = 0
+    new_input = []
     for line in data:
-        print line
+        #print line
         if line == "FIN":
             if simulation.context_switches == 0:
                 simulation.changed_context = True
             if simulation.quantum != -1 and simulation.context_switches != -1 and simulation.algorithm != "" and len(simulation.processes) > 0:
+                arrayInput.append(new_input)
                 simulations.append(simulation)
             simulation = CPUScheduler()
+            new_input = []
             numScheduler+=1
         elif line == "SJF":
+            new_input.append(line)
             simulation.algorithm = "SJF"
         elif line == "SRT":
+            new_input.append(line)
             simulation.algorithm = "SRT"
         else:
+            new_input.append(line)
             words = line.split(" ")
             if len(words) == 0 or words[0] == "":
                 continue
