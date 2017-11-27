@@ -12,6 +12,9 @@ from cpu import *
 import Queue
 from process import *
 
+timeSRT = []
+timeSJF = []
+
 class CPUScheduler:
     def __init__(self):
         # The timer expresses the actual time
@@ -26,13 +29,17 @@ class CPUScheduler:
         self.context_switches = -1
         # List of processes
         self.processes = []
+        # Copy of list of processes
+        self.processes_copy = []
         # Priority Queue for the ready processes since they are ordered by cpu time
         self.ready_list = Queue.PriorityQueue()
         # Process which get blocked because an IO go in here.
         self.blocked_list = []
         # CPUs that are going to be used
         self.cpus = []
-    
+
+
+
     # Creates CPU objects
     def createCPUs(self):
         for i in range(self.num_cpus):
@@ -43,7 +50,7 @@ class CPUScheduler:
                 new_cpu.changed_context = True
             self.cpus.append(new_cpu)
 
-    
+
     # Returns True if all cpus are not in use
     def cpusEmpty(self):
         empty = True
@@ -55,12 +62,16 @@ class CPUScheduler:
     def start(self):
         self.outputHeader()
         self.createCPUs()
+
+        for proc in self.processes:
+            self.processes_copy.append(proc)
+
         while len(self.processes) > 0 or len(self.ready_list.queue) > 0 or len(self.blocked_list) > 0 or not self.cpusEmpty():
             # Check to see if there is a Process that just arrived
             self.checkProcesses()
             # Check if a process can be unblocked
             self.checkBlockedList()
-            
+
             if self.algorithm == "SJF":
                 self.stepCPUs()
                 self.SJF()
@@ -72,10 +83,28 @@ class CPUScheduler:
                 return
             self.output()
             self.timer += 1
-            if self.timer > 100:
+            if self.timer > 1000:
                 break
         print("=============================================================================================================================================")
-
+        print ("Estadisitcas: ")
+        turnaround_prom = 0
+        tiempo_espera_prom = 0
+        count = 0
+        for process in self.processes_copy:
+            print("Process ID: %s" %(process.pid))
+            print("Turaround time: %s" % (process.time_to_finish - 1))
+            print("Tiempo de espera: %s" % (process.time_to_finish - 1 - process.cpu_time))
+            turnaround_prom +=  process.time_to_finish - 1
+            tiempo_espera_prom += process.time_to_finish - 1 - process.cpu_time
+            count += 1
+        tiempo_espera_prom = tiempo_espera_prom /count
+        turnaround_prom = turnaround_prom/count
+        print("Turaround promedio: %s" %turnaround_prom)
+        print("Tiempo de espera promedio: %s" %tiempo_espera_prom)
+        if self.algorithm == "SJF":
+            timeSJF.append(tuple((turnaround_prom, tiempo_espera_prom)))
+        elif self.algorithm == "SRT":
+            timeSRT.append(tuple((turnaround_prom, tiempo_espera_prom)))
     # Check if there is a process that just arrived and add it to the ready list.
     def checkProcesses(self):
         aux = list(self.processes)
@@ -102,7 +131,19 @@ class CPUScheduler:
             blocked = cpu.step()
             if blocked:
                 blocked.blocked = True
-                self.blocked_list.append(blocked)
+                self.blocked_list.append(blocked) #CPU listos y bloquedados
+            for process in self.processes_copy:
+                if cpu.current_process and process.pid == cpu.current_process.pid:
+                    process.time_to_finish += 1
+        for process_block in self.blocked_list:
+            for process_copy in self.processes_copy:
+                if self.blocked_list and process_block.pid == process_copy.pid:
+                    process_copy.time_to_finish += 1
+        for process_ready in self.ready_list.queue:
+            for process_copy in self.processes_copy:
+                if self.ready_list and process_ready.pid == process_copy.pid:
+                    process_copy.time_to_finish += 1
+
 
     # SJF is a non preemptive algorithm so first check if the cpu is not in use.
     def SJF(self):
@@ -190,3 +231,26 @@ simulations = parse()
 
 for simulation in simulations:
     simulation.start()
+print ("")
+print("=============================================================================================================================================")
+print("Resumen de tiempos promedios")
+print("SRT:")
+for srt in timeSRT:
+    print("Turnaround promedio: %s" %srt[0])
+    print("Tiempo de espera promedio: %s" %srt[1])
+
+print(" ")
+print("SRT:")
+for sjf in timeSJF:
+    print("Turnaround promedio: %s" %sjf[0])
+    print("Tiempo de espera promedio: %s" %sjf[1])
+
+print ("")
+print("=============================================================================================================================================")
+print("Comparacion de algoritmos")
+for x in range(0, len(timeSRT)):
+    print("Algoritmo: %s" %(x + 1))
+    if timeSJF[x][0] < timeSRT[x][0]:
+        print("Para el conjunto de procesos %s es mejor usar SJF. " %(x + 1))
+    else:
+        print("Para el conjunto de procesos %s es mejor usar SRT. " %(x + 1))

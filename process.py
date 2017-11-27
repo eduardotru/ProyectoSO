@@ -6,7 +6,7 @@ class process:
         # Time in miliseconds that the process is in the cpu
         self.cpu_time = 0
         # Time that has been processed
-        self.time_processed = 0 
+        self.time_processed = 0
         # Arrival time of the process to the CPU Scheduler
         self.arrival_time = 0
         # Unused. Priority of the process
@@ -17,6 +17,8 @@ class process:
         self.io_duration = []
         # True if the process is blocked in an IO operation
         self.blocked = False
+        #Time from start to end of the process
+        self.time_to_finish = 0
 
     def __cmp__(self, other):
         return cmp(self.cpu_time, other.cpu_time)
