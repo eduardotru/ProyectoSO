@@ -167,6 +167,8 @@ class CPUScheduler:
             if len(self.ready_list.queue) > 0:
                 p = self.ready_list.get()
                 assigned = cpu.assign_process(p)
+                if isinstance(assigned, process):
+                    self.ready_list.put(assigned)
                 if not assigned:
                     self.ready_list.put(p)
 

@@ -26,14 +26,15 @@ class CPU(object):
         self.context_switch = context_switch
 
     # Asigns the process to the CPU
-    def assign_process(self, process):
+    def assign_process(self, process, scheduler = None):
         if not self.changed_context:
             return False
-        if self.in_use and self.current_process.cpu_time < process.cpu_time:
+        if self.in_use and (self.current_process.cpu_time - self.current_process.time_processed) >= (process.cpu_time - process.time_processed):
+            p = self.current_process
             self.change_context(process)
             self.current_process = process
             self.current_time = 0
-            return True
+            return p
         elif not self.in_use:
             self.change_context(process)
             self.current_process = process
