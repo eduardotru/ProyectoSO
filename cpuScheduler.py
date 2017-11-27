@@ -12,11 +12,11 @@ from cpu import *
 import Queue
 from process import *
 
-timer = 0
-
+#Has tuples with turnaround time and wait time of SRT algorithms.
 timeSRT = []
+#Has tuples with turnaround time and wait time of SJF algorithms.
 timeSJF = []
-
+#Has all the inputs in a list of lists
 arrayInput = []
 
 class CPUScheduler:
