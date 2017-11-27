@@ -115,7 +115,7 @@ class CPUScheduler:
             timeSJF.append(tuple((turnaround_prom, tiempo_espera_prom)))
         elif self.algorithm == "SRT":
             timeSRT.append(tuple((turnaround_prom, tiempo_espera_prom)))
-    
+
     # Check if there is a process that just arrived and add it to the ready list.
     def checkProcesses(self):
         aux = list(self.processes)
@@ -271,5 +271,7 @@ for x in range(0, len(timeSRT)):
     print("Algoritmo: %s" %(x + 1))
     if timeSJF[x][0] < timeSRT[x][0]:
         print("Para el conjunto de procesos %s es mejor usar SJF. " %(x + 1))
-    else:
+    elif timeSJF[x][0] < timeSRT[x][0]:
         print("Para el conjunto de procesos %s es mejor usar SRT. " %(x + 1))
+    else:
+        print("Para el conjunto de procesos %s es igual usar SRT o SJF. " %(x + 1))
